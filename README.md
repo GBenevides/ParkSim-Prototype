@@ -1,2 +1,3 @@
-# ParkSim-Prototype
-Prototype - Parking Simulator
+# ParkSimProto
+
+Parking simulation proto
