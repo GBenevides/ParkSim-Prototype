@@ -3,7 +3,7 @@ from parkSim.Window import *
 
 if __name__ == '__main__':
     # Create simulation
-    sim = Simulation()
+    sim = Simulation({"simu_slow_down": 10})
 
     a = 300
     b = 100
@@ -38,4 +38,4 @@ if __name__ == '__main__':
 
     # Start simulation
     win = Window(sim)
-    win.run()
+    win.run(10)
