@@ -24,7 +24,6 @@ class TestSimulation(TestCase):
         sim1 = Simulation()
         self.assertTrue(len(sim1.vehicles) + len(sim1.roads) == 0)
         self.assertEqual(0, sim1.current_id)
-        self.assertEqual(20, sim1.simu_slow_down)
         self.assertEqual(0, sim1.log_level)
         sim2 = Simulation({"log_level": 2, "current_id": 5, "bla": 321})
         self.assertEqual(5, sim2.current_id)
@@ -60,7 +59,7 @@ class TestSimulation(TestCase):
         sim1.roads.append(road)
         v1 = Vehicle(0)
         sim1.insert_vehicle_in_road(road, v1)
-        self.assertTrue(v1.alive)
+        self.assertTrue(v1.is_alive())
 
     @unittest.skip
     def test_get_possible_roads(self):

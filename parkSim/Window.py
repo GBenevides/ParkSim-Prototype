@@ -33,7 +33,7 @@ class Window:
 
     def loop(self, loop=None):
         # Create a pygame window
-        self.screen = pygame.display.set_mode((self.width, self.height), pygame.RESIZABLE)
+        self.screen = pygame.display.set_mode((self.width, self.height))
         pygame.display.set_caption("Prototype")
         pygame.display.flip()
 
@@ -96,7 +96,6 @@ class Window:
     def run(self, steps_per_update=1):
         def loop(sim):
             sim.run(steps_per_update)
-
         self.loop(loop)
 
     def convert(self, x, y=None):
@@ -288,7 +287,7 @@ class Window:
                     )
 
     def draw_status(self):
-        text_fps = self.text_font.render(f't={self.sim.t:.5} minutes', False, (0, 0, 0))
+        text_fps = self.text_font.render(f't={self.sim.t:.5} seconds', False, (0, 0, 0))
         text_frc = self.text_font.render(f'n={self.sim.frame_count} frames', False, (0, 0, 0))
 
         self.screen.blit(text_fps, (0, 0))

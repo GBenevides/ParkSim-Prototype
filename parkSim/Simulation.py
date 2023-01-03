@@ -12,7 +12,6 @@ class Simulation:
         self.vehicles = []
         self.nodes = []
         self.current_id = 0
-        self.simu_slow_down = 1
         self.log_level = 0
 
         # Update configuration
@@ -25,7 +24,6 @@ class Simulation:
         self.dt = 1 / 100  # Simulation time step
         self.roads = []  # Array to store roads
         self.generators = []
-        self.stepCounter = 0
 
     def _create_road(self, start, end, name):
         road = Road(start, end, name)
@@ -48,7 +46,7 @@ class Simulation:
 
     def run(self, steps):
         for _ in range(steps):
-            self.update()
+            self.react()
 
     def road_options_at_coordinates(self, x, y):
         options = []
@@ -59,19 +57,16 @@ class Simulation:
 
     def insert_vehicle_in_road(self, road, upcomingVehicle):
         road.push_vehicle(upcomingVehicle)
-        upcomingVehicle.alive = True
+        upcomingVehicle.set_alive(self.t)
         upcomingVehicle.x = 0
         roadIndex = self.roads.index(road)
         upcomingVehicle.current_road = roadIndex
 
     def get_possible_roads(self, current_road_end):
-        possible = []
-        for road in self.roads:
-            if road.start == current_road_end:
-                possible.append(self.roads.index(road))
-        return possible
+        possibilities = [self.roads.index(road) for road in self.roads if road.start == current_road_end]
+        return possibilities
 
-    def update(self):
+    def react(self):
         # Update every road
         for road in self.roads:
             road.react(self.dt)
@@ -83,24 +78,19 @@ class Simulation:
 
         # Update vehicles
         for vehicle in self.vehicles:
-            if vehicle.alive:
+            if vehicle.is_alive():
                 current_road = self.roads[vehicle.current_road]
                 lead_vehicle = current_road.vehicle_immediately_ahead(vehicle)
-                possible_roads = self.get_possible_roads(current_road.end)
+                possible_roads_indexes = self.get_possible_roads(current_road.end)
                 lead_x = lead_vehicle.x if lead_vehicle is not None else None
-                wants_to_change_to = vehicle.react(lead_x, current_road.length, current_road.safetyDistance,
-                                                   possible_roads)
-                ##TODO space available at start of all others that START in the same place HAHHAHA
-                spaceAvailableAtStart = len([roadWithSpace for roadWithSpace in possible_roads if
-                                             self.roads[roadWithSpace].space_available_at_start(vehicle.l)]) == len(
-                    possible_roads)
-                if wants_to_change_to is not None and spaceAvailableAtStart:  # and CAN change to
+                wants_to_change_to = vehicle.react(self.dt, lead_x, current_road.length, current_road.safetyDistance,
+                                                   possible_roads_indexes)
+                all_roads_avaiable_at_start = all(
+                    self.roads[roadWithSpace].space_available_at_start(vehicle.l) for roadWithSpace in
+                    possible_roads_indexes)
+                if wants_to_change_to is not None and all_roads_avaiable_at_start:  # and CAN change to
                     self.roads[vehicle.current_road].pop_vehicle()
                     self.insert_vehicle_in_road(self.roads[wants_to_change_to], vehicle)
 
-        # Increment time step and slow down if necessary
-        if self.stepCounter % self.simu_slow_down == 0:
-            self.t += self.dt
-            self.frame_count += 1
-
-        self.stepCounter += 1
+        self.t += self.dt
+        self.frame_count += 1
